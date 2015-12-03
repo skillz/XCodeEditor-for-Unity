@@ -291,7 +291,21 @@ namespace UnityEditor.SKZXCodeEditor
 			modified = true;
 			return modified;
 		}
+
+		public bool AddLDRuntimeSearchPaths( string path )
+		{
+			return AddLDRuntimeSearchPaths( new PBXList( path ) );
+		}
 		
+		public bool AddLDRuntimeSearchPaths( PBXList paths )
+		{
+			foreach( KeyValuePair<string, XCBuildConfiguration> buildConfig in buildConfigurations ) {
+				buildConfig.Value.AddLDRuntimeSearchPaths( paths );
+			}
+			modified = true;
+			return modified;
+		}
+
 		public bool AddLibrarySearchPaths( string path )
 		{
 			return AddLibrarySearchPaths( new PBXList( path ) );
@@ -362,7 +376,7 @@ namespace UnityEditor.SKZXCodeEditor
 //			}
 //		}
 		
-		public PBXDictionary AddFile( string filePath, PBXGroup parent = null, string tree = "SOURCE_ROOT", bool createBuildFiles = true, bool weak = false )
+		public PBXDictionary AddFile( string filePath, PBXGroup parent = null, string tree = "SOURCE_ROOT", bool createBuildFiles = true, bool weak = false, bool embed = false )
 		{
 			PBXDictionary results = new PBXDictionary();
 			string absPath = string.Empty;
@@ -428,6 +442,22 @@ namespace UnityEditor.SKZXCodeEditor
 							string frameworkPath = Path.Combine( "$(SRCROOT)", Path.GetDirectoryName( filePath ) );
 							this.AddFrameworkSearchPaths(new PBXList(frameworkPath));
 						}
+						
+						if(embed)
+						{
+							string ldRuntimePath = "$(inherited) @executable_path/Frameworks";
+							this.AddLDRuntimeSearchPaths(ldRuntimePath);
+							//LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+							//Should this create a new copyBuildPhase
+							foreach( KeyValuePair<string, PBXCopyFilesBuildPhase> currentObject in copyBuildPhases ) {
+								buildFile = new PBXBuildFile( fileReference, weak, true );
+								buildFiles.Add( buildFile );
+								currentObject.Value.data["name"] = "Embed Frameworks";
+								currentObject.Value.data["dstSubfolderSpec"] = 10;
+								currentObject.Value.AddBuildFile( buildFile );
+							}
+						}
+
 						break;
 					case "PBXResourcesBuildPhase":
 						foreach( KeyValuePair<string, PBXResourcesBuildPhase> currentObject in resourcesBuildPhases ) {
@@ -1053,7 +1083,7 @@ namespace UnityEditor.SKZXCodeEditor
 			// Parse result object directly into file
 			PBXParser parser = new PBXParser();
 			StreamWriter saveFile = File.CreateText( System.IO.Path.Combine( this.filePath, "project.pbxproj" ) );
-			saveFile.Write( parser.Encode( result, false ) );
+			saveFile.Write( parser.Encode( result, true ) );
 			saveFile.Close();
 
 //			Xcode4Controller.Connect();
