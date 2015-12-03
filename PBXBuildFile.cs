@@ -11,12 +11,15 @@ namespace UnityEditor.SKZXCodeEditor
 		private const string ATTRIBUTES_KEY = "ATTRIBUTES";
 		private const string WEAK_VALUE = "Weak";
 		private const string COMPILER_FLAGS_KEY = "COMPILER_FLAGS";
+		private const string CODE_SIGN_VALUE = "CodeSignOnCopy";
+		private const string REMOVE_HEADERS_VALUE = "RemoveHeadersOnCopy";
 		
-		public PBXBuildFile( PBXFileReference fileRef, bool weak = false ) : base()
+		public PBXBuildFile( PBXFileReference fileRef, bool weak = false, bool embed = false ) : base()
 		{
 			
 			this.Add( FILE_REF_KEY, fileRef.guid );
 			SetWeakLink( weak );
+			SetEmbed( embed );
 
 //    def Create(cls, file_ref, weak=False):
 //        if isinstance(file_ref, PBXFileReference):
@@ -36,7 +39,58 @@ namespace UnityEditor.SKZXCodeEditor
 		{
 //			Debug.Log( "constructor child" );
 		}
-		
+
+		public bool SetEmbed( bool embed = false )
+		{
+			PBXDictionary settings = null;
+			PBXList attributes = null;
+			
+			if( !_data.ContainsKey( SETTINGS_KEY ) ) {
+				if( embed ) {
+					attributes = new PBXList();
+					attributes.Add( CODE_SIGN_VALUE );
+					attributes.Add( REMOVE_HEADERS_VALUE );
+
+					settings = new PBXDictionary();
+					settings.Add( ATTRIBUTES_KEY, attributes );
+					_data[ SETTINGS_KEY ] = settings;
+				}
+				return true;
+			}
+			
+			settings = _data[ SETTINGS_KEY ] as PBXDictionary;
+			if( !settings.ContainsKey( ATTRIBUTES_KEY ) ) {
+				if( embed ) {
+					attributes = new PBXList();
+					attributes.Add( CODE_SIGN_VALUE );
+					attributes.Add( REMOVE_HEADERS_VALUE );
+					settings.Add( ATTRIBUTES_KEY, attributes );
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				attributes = settings[ ATTRIBUTES_KEY ] as PBXList;
+			}
+			
+			if( embed ) {
+				attributes.Add( CODE_SIGN_VALUE );
+				attributes.Add( REMOVE_HEADERS_VALUE );
+			}
+			/*
+			 * No need to remove these
+			 * else {
+				attributes.Remove( WEAK_VALUE );
+			}*/
+			
+			settings.Add( ATTRIBUTES_KEY, attributes );
+			this.Add( SETTINGS_KEY, settings );
+			
+			return true;
+		}
+
 		public bool SetWeakLink( bool weak = false )
 		{
 			PBXDictionary settings = null;
