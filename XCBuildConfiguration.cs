@@ -9,6 +9,7 @@ namespace UnityEditor.SKZXCodeEditor
 		protected const string HEADER_SEARCH_PATHS_KEY = "HEADER_SEARCH_PATHS";
 		protected const string LIBRARY_SEARCH_PATHS_KEY = "LIBRARY_SEARCH_PATHS";
 		protected const string FRAMEWORK_SEARCH_PATHS_KEY = "FRAMEWORK_SEARCH_PATHS";
+		protected const string LD_RUNPATH_SEARCH_PATHS_KEY = "LD_RUNPATH_SEARCH_PATHS";
 		protected const string OTHER_C_FLAGS_KEY = "OTHER_CFLAGS";
 		protected const string OTHER_LD_FLAGS_KEY = "OTHER_LDFLAGS";
 		protected const string GCC_ENABLE_CPP_EXCEPTIONS_KEY = "GCC_ENABLE_CPP_EXCEPTIONS";
@@ -67,7 +68,12 @@ namespace UnityEditor.SKZXCodeEditor
 		
 			return modified;
 		}
-		
+
+		public bool AddLDRuntimeSearchPaths( PBXList paths, bool recursive = true )
+		{
+			return this.AddSearchPaths( paths, LD_RUNPATH_SEARCH_PATHS_KEY, recursive );
+		}
+
 		public bool AddHeaderSearchPaths( PBXList paths, bool recursive = true )
 		{
 			return this.AddSearchPaths( paths, HEADER_SEARCH_PATHS_KEY, recursive );
