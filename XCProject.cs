@@ -398,8 +398,8 @@ namespace UnityEditor.SKZXCodeEditor
 						{
 							string ldRuntimePath = "$(inherited) @executable_path/Frameworks";
 							this.AddLDRuntimeSearchPaths(ldRuntimePath);
-							//LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-							//Should this create a new copyBuildPhase
+
+							//Create a new copyBuildPhase for the embed framework
 							foreach( KeyValuePair<string, PBXCopyFilesBuildPhase> currentObject in copyBuildPhases ) {
 								buildFile = new PBXBuildFile( fileReference, weak, true );
 								buildFiles.Add( buildFile );
