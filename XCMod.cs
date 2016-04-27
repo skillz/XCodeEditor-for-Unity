@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.IO;
-using Json = MiniJSON;
+using Json = SkillzSDK.MiniJSON;
 
 namespace UnityEditor.SKZXCodeEditor 
 {
